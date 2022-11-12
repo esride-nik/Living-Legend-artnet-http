@@ -61,6 +61,7 @@ app.use(bodyParser.json());
 
 app.post('/:universe?/:channel?', (req, res) => {
     if (canReceive) {
+        // opening and closing Artnet on every message is probably not state of the art, but helped me to go about an issue in my instable ESP32 receiver program
         var artnet = require('artnet')({
             host: options.artnet_host,
             port: options.artnet_port
