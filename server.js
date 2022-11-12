@@ -55,17 +55,18 @@ if (!options.artnet_host) {
     process.exit();
 }
 
-var artnet = require('artnet')({
-    host: options.artnet_host,
-    port: options.artnet_port
-});
 
 app.use(cors());
 app.use(bodyParser.json());
 
 app.post('/:universe?/:channel?', (req, res) => {
     if (canReceive) {
-        console.log("RECEIVING", req.body[0]);
+        var artnet = require('artnet')({
+            host: options.artnet_host,
+            port: options.artnet_port
+        });
+
+        console.log("RECEIVING", req.body.length, req.body.slice(0, 3));
         canReceive = false;
 
         var universe = req.params.universe || 0;
@@ -85,10 +86,11 @@ app.post('/:universe?/:channel?', (req, res) => {
             // headersSent = true;
             // }
             canReceive = true;
+            artnet.close();
         };
 
         if (options.verbose) {
-            console.log(universe + "/" + channel + " " + req.body);
+            console.log(universe + "/" + channel);// + " " + req.body);
         }
 
         if (Array.isArray(req.body)) {
@@ -106,5 +108,4 @@ console.log('Listening on port ' + options.listen_port);
 app.listen(options.listen_port)
 
 process.on('exit', (code) => {
-    artnet.close();
 });

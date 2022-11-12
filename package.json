@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js -a 192.168.178.58 -p 9000"
+    "start": "node server.js -a 192.168.178.58 -p 9000 -v"
   },
   "author": "",
   "license": "GPL-3.0",
