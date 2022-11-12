@@ -1,6 +1,9 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+const cors = require('cors');
+
+let canReceive = true;
 
 const commandLineArgs = require('command-line-args');
 const optionDefinitions = [
@@ -57,35 +60,45 @@ var artnet = require('artnet')({
     port: options.artnet_port
 });
 
-app.use(bodyParser.json())
+app.use(cors());
+app.use(bodyParser.json());
 
 app.post('/:universe?/:channel?', (req, res) => {
+    if (canReceive) {
+        console.log("RECEIVING", req.body[0]);
+        canReceive = false;
 
-    var universe = req.params.universe || 0;
-    var channel = req.params.channel || 1;
+        var universe = req.params.universe || 0;
+        var channel = req.params.channel || 1;
 
-    var responseFn = (err, artnet_res) => {
-        if (err) {
-            if (options.verbose) {
-                console.log(err);
+        var responseFn = (err, artnet_res) => {
+            console.log("responseFn");
+            if (err) {
+                if (options.verbose) {
+                    console.log(err);
+                }
+                res.status(500).send(err);
             }
-            res.status(500).send(err);
-        }
-        res.sendStatus(200);
-    };
+            console.log("SENDING 200");
+            // if (!headersSent) {
+            res.sendStatus(200);
+            // headersSent = true;
+            // }
+            canReceive = true;
+        };
 
-    if (options.verbose) {
-        console.log(universe + "/" + channel + " " + req.body);
-    }
-
-    if (Array.isArray(req.body)) {
-        console.log('artnet.set ', universe, channel, req.body, responseFn);
-        artnet.set(universe, channel, req.body, responseFn);
-    } else {
         if (options.verbose) {
-            console.log("Bad request body: " + req.body);
+            console.log(universe + "/" + channel + " " + req.body);
         }
-        res.sendStatus(400);
+
+        if (Array.isArray(req.body)) {
+            artnet.set(universe, channel, req.body, responseFn);
+        } else {
+            if (options.verbose) {
+                console.log("Bad request body: " + req.body);
+            }
+            res.sendStatus(400);
+        }
     }
 });
 
