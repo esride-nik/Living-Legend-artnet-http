@@ -1,3 +1,13 @@
+Enter IP of your ESP in the ```package.json``` start script or better, create your own script!
+
+```
+"start": "node server.js -a <ESP_IP> -p 9000 -v"
+```
+
+
+---
+
+
 ```
 
 artnet-http bridge
